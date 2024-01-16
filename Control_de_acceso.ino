@@ -1,90 +1,50 @@
-#include <WiFi.h>
-#include <PubSubClient.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 #include <Keypad.h>
 
-// Definir los detalles de la red WiFi
-const char* ssid = "AP_asix";
-const char* password = "AP_asix2023";
+#define ROW_NUM     4 // four rows
+#define COLUMN_NUM  4 // four columns
 
-// Definir los detalles del servidor MQTT
-const char* mqtt_server = "10.0.110.103";
-const int mqtt_port = 1883;
-const char* mqtt_user = "sensor";
-const char* mqtt_password = "sensor";
-const char* topicACE = "resultado/control_acceso";
-
-WiFiClient espClient;
-PubSubClient client(espClient);
-
-// Definir la configuración del teclado matricial y los pines a los que está conectado
-const byte ROWS = 4;
-const byte COLS = 3;
-char keys[ROWS][COLS] = {
-  {'1','2','3'},
-  {'4','5','6'},
-  {'7','8','9'},
-  {'*','0','#'}
+char keys[ROW_NUM][COLUMN_NUM] = {
+  {'1', '2', '3', 'A'},
+  {'4', '5', '6', 'B'},
+  {'7', '8', '9', 'C'},
+  {'*', '0', '#', 'D'}
 };
-byte rowPins[ROWS] = {5, 4, 14, 27}; // Conectar a los pines del ESP32
-byte colPins[COLS] = {15, 2, 0}; // Conectar a los pines del ESP32
 
-Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+byte pin_rows[ROW_NUM]      = {19, 18, 5, 17}; // GPIO19, GPIO18, GPIO5, GPIO17 connect to the row pins
+byte pin_column[COLUMN_NUM] = {16, 4, 0, 2};   // GPIO16, GPIO4, GPIO0, GPIO2 connect to the column pins
 
-// Inicializar la pantalla
-#define SCREEN_WIDTH 128 // Ancho de la pantalla OLED, en píxeles
-#define SCREEN_HEIGHT 64 // Altura de la pantalla OLED, en píxeles
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+Keypad keypad = Keypad( makeKeymap(keys), pin_rows, pin_column, ROW_NUM, COLUMN_NUM );
 
-void setup_wifi() {
-  delay(10);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-  }
-}
-
-void callback(char* topic, byte* payload, unsigned int length) {
-  // Manejar los mensajes recibidos por MQTT si es necesario
-}
-
-void reconnect() {
-  while (!client.connected()) {
-    if (client.connect("ESP32Client", mqtt_user, mqtt_password )) {
-      // Suscribirse a los temas si es necesario
-    } else {
-      delay(5000);
-    }
-  }
-}
+int storedNumber = 1234; // Número previamente almacenado para comparación
 
 void setup() {
-  Serial.begin(115200);
-  setup_wifi();
-  client.setServer(mqtt_server, mqtt_port);
-  client.setCallback(callback);
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;);
-  }
-  display.clearDisplay();
+  Serial.begin(9600); // Iniciar la comunicación con el puerto serie
 }
 
+int userInput = 0; // Variable para almacenar el número introducido por el usuario
+
 void loop() {
-  char key = keypad.getKey();
+  char key = keypad.getKey(); // Obtener la tecla presionada por el usuario
   if (key) {
-    Serial.println(key);
-    // Mostrar la tecla presionada en el monitor serial
-    // Realizar la lógica de validación del código de acceso con el teclado matricial
-    // Enviar el resultado por MQTT al otro dispositivo
-    if (client.connected()) {
-      client.publish(topicACE, "Acceso Permitido o Denegado");  
+//    Serial.print("Tecla presada: ");
+    if (key >= '0' && key <= '9'){
+      Serial.println("*");
+    } 
+    else{
+      Serial.println(" "); }
+    
+    if (key >= '0' && key <= '9') { // Verificar si la tecla presionada es un dígito
+      userInput = userInput * 10 + (key - '0'); // Construir el número introducido por el usuario
+    } 
+    else if (key == 'A') { // Si se presiona la tecla 'A'
+      if (userInput == storedNumber) {
+        Serial.println("¡Número correcto!"); // El número introducido es correcto
+      } 
+      else {
+        Serial.println("Número incorrecto, vuelve a intentar"); // El número introducido es incorrecto
+        userInput = 0; // Restablecer el valor de userInput para la próxima entrada
+      }
+      
     }
-  }
-  client.loop();
-  if (!client.connected()) {
-    reconnect();
   }
 }
