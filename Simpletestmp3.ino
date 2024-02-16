@@ -49,3 +49,38 @@ void sendCommand(int8_t command, int16_t dat)
     mySerial.write(Send_buf[i]);
   }
 }
+#define SENSOR_PIN 14 // Pin del sensor de movimiento PIR
+#define MP3_TX_PIN 15 // Pin TX del módulo serial MP3
+#define MP3_RX_PIN 13 // Pin RX del módulo serial MP3
+
+void setup() {
+  pinMode(SENSOR_PIN, INPUT);
+  pinMode(MP3_TX_PIN, OUTPUT);
+  pinMode(MP3_RX_PIN, INPUT);
+
+  Serial.begin(9600); // Iniciar comunicación serial para depuración
+
+  // Inicializar el módulo serial MP3
+  // Reemplaza 9600 con la velocidad de baudios correcta para tu módulo MP3
+  Serial1.begin(9600, SERIAL_8N1, MP3_RX_PIN, MP3_TX_PIN);
+
+  // Inicialización adicional del módulo MP3 (si es necesaria)
+}
+
+void loop() {
+  int pirState = digitalRead(SENSOR_PIN);
+  if (pirState == HIGH) { // Se detectó movimiento
+    // Envía comandos al módulo serial MP3 para reproducir un archivo de audio
+    playAudio("mi_archivo.mp3"); // Reemplaza con el nombre de tu archivo de audio
+    delay(5000); // Espera 5 segundos antes de permitir otra activación (ajusta según tus necesidades)
+  }
+}
+
+void playAudio(String filename) {
+  // Enviar los comandos AT adecuados para reproducir el archivo de audio
+  // Los comandos específicos dependerán del módulo serial MP3 que estés utilizando
+  // Por ejemplo, podrías enviar algo como:
+  Serial1.println("play " + filename);
+  Serial1.println("vol 10");  // Para ajustar el volumen
+}
+
