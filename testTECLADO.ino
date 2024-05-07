@@ -41,7 +41,7 @@ int contador_fallos = 0;
 const char* ssid = "AP_asix";
 const char* password =  "AP_asix2023";
 //********* Connexió MQTT
-const char* mqttServer = "10.0.110.113";
+const char* mqttServer = "10.0.110.112";
 const int mqttPort = 1883;
 const char* mqttUser = "ADMIN"; //sensor o control
 const char* mqttPassword = "ASIX";
@@ -272,13 +272,10 @@ void setup() {
   display.clearDisplay();
  	display.display();
   }
-int usuari = 0;
+
 void loop() {
  char key = keypad.getKey();
  display.setCursor(0, 0);
- if (usuari != 1) {
- display.print("Tria un usuari\nA-----ADMIN\nB-----RECEPCIÓ\nC-----CLIENT1");
- }
  display.println("Escriu el PIN:\n");
  display.display();
  if (key) {
