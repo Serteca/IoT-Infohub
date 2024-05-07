@@ -234,15 +234,7 @@ void setup() {
     delay(500);
     Serial.print("Connectant-se al WiFi: ");
     Serial.println(ssid);
-     display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
-     display.display();
-     display.clearDisplay();
-     display.display();
-     display.setTextSize(1);
-     display.setTextColor(WHITE,BLACK);
-     display.drawBitmap(16, 0, imgNuclear, 128, 64, SSD1306_WHITE);
-     display.display();
-     delay(10000);
+     
   }
   Serial.println("Connectat al WiFi!");
   //CERTIFICATS
