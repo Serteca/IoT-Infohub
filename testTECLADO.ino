@@ -1,19 +1,9 @@
-/** CODI ESP32 PER ENVIAR TEMPERATURA I HUMITAT DEL SENSOR DHT11
-** A UN BROKER MQTT. TAMBÉ ES SUBSCRIU A UN CANAL PER ON REBRÀ
-** SENYALS D'ALARMA QUE ENCENDRAN UN LED 
-**/
-//**** LLIBRERIES PER PANTALLA
-// ESP32 NodeMCU I2C: SCL GPIO22, SDA GPIO21
 #include <SPI.h>
 #include <Key.h>
 #include <Keypad.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-
-#include <DHT.h>
-#include <DHT_U.h>
-//#include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 
@@ -35,13 +25,13 @@ int characterCount = 0;
 int contador_fallos = 0;
 
 /***************************************************** 
-*****    PARÀMETRES A MODIFICAR10.0.110.111   ********************
+*****    PARÀMETRES A MODIFICAR   ********************
 ******************************************************/
 //********* Connexió WiFi
 const char* ssid = "AP_asix";
 const char* password =  "AP_asix2023";
 //********* Connexió MQTT
-const char* mqttServer = "10.0.110.112";
+const char* mqttServer = "10.0.110.111";
 const int mqttPort = 1883;
 const char* mqttUser = "ADMIN"; //sensor o control
 const char* mqttPassword = "ASIX";
@@ -93,14 +83,10 @@ static const unsigned char PROGMEM imgNuclear[512] = {
    0x00, 0x1c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00 };
 
-byte pin_rows[ROW_NUM]      = {19, 18, 5, 17}; // GPIO19, GPIO18, GPIO5, GPIO17 conectados a los pines de las filas
-byte pin_column[COLUMN_NUM] = {16, 4, 0, 2};   // GPIO16, GPIO4, GPIO0, GPIO2 conectados a los pines de las columnas
+byte pin_rows[ROW_NUM]      = {19, 18, 5, 27}; // GPIO19, GPIO18, GPIO5, GPIO27 conectados a los pines de las filas
+byte pin_column[COLUMN_NUM] = {26, 4, 0, 2};   // GPIO26, GPIO4, GPIO0, GPIO2 conectados a los pines de las columnas
 
 Keypad keypad = Keypad( makeKeymap(keys), pin_rows, pin_column, ROW_NUM, COLUMN_NUM );
-
-#define DHTPIN 27    //D27 del ESP27 Dev Module
-  #define DHTTYPE DHT11 
-  DHT dht(DHTPIN, DHTTYPE);
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -247,8 +233,6 @@ void setup() {
   
   //rutina de gestió de dades rebudes
   client.setCallback(callback);
-  //inicialitzem el sensor
-  dht.begin();
   //inicialitzem la pantalla LCD
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
   display.display();
